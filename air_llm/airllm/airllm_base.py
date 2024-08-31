@@ -614,8 +614,8 @@ class AirLLMBaseModel(GenerationMixin):
 
         if output_hidden_states:
             all_hidden_states = all_hidden_states[0:-2]
-            for i in range(len(all_hidden_states)):
-                all_hidden_states[i] = torch.cat(all_hidden_states[i], 0)
+            # for i in range(len(all_hidden_states)):
+                # all_hidden_states[i] = torch.cat(all_hidden_states[i], 0)
 
         if not return_dict:
             return tuple(v for v in [logits,
