@@ -508,6 +508,7 @@ class AirLLMBaseModel(GenerationMixin):
                         batch[j] = layer(seq)
                     elif layer_name == self.layer_names_dict['norm']:
                         #batch[j] = layer(seq[torch.arange(n_seq), batch_eos[j]][:, None])
+                        self.clear_gpu_memory()
                         batch[j] = self.run_norm(layer, seq)
 
                         if output_attentions:
