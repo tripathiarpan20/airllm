@@ -605,7 +605,10 @@ class AirLLMBaseModel(GenerationMixin):
                 layer.to("meta")
                 clean_memory()  # proposed by CPMP
 
-        logits = torch.cat(batch, 0)
+        # Redundant, just spikes the GPU memory
+        # logits = torch.cat(batch, 0)
+        logits = batch
+        
         if use_cache:
             kv_cache_list = kv_cache_list[1:-2]
             for i in range(len(kv_cache_list)):
