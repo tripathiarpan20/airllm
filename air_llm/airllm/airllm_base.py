@@ -2,6 +2,7 @@
 from typing import List, Optional, Tuple, Union
 from tqdm import tqdm
 from pathlib import Path
+import gc
 import time
 from concurrent.futures import ThreadPoolExecutor
 
@@ -392,6 +393,10 @@ class AirLLMBaseModel(GenerationMixin):
 
     def run_norm(self, layer, seq):
         return layer(seq)
+    
+    def clear_gpu_memory(self):
+        torch.cuda.empty_cache()
+        gc.collect()
 
     def forward(
             self,
@@ -503,11 +508,13 @@ class AirLLMBaseModel(GenerationMixin):
                         batch[j] = layer(seq)
                     elif layer_name == self.layer_names_dict['norm']:
                         #batch[j] = layer(seq[torch.arange(n_seq), batch_eos[j]][:, None])
+                        self.clear_gpu_memory()
                         batch[j] = self.run_norm(layer, seq)
 
                         if output_attentions:
                             all_hidden_states[i].append(batch[j])
                     elif layer_name == self.layer_names_dict['lm_head']:
+                        self.clear_gpu_memory()
                         batch[j] = self.run_lm_head(layer, seq)
                     else:
 
@@ -614,8 +621,8 @@ class AirLLMBaseModel(GenerationMixin):
 
         if output_hidden_states:
             all_hidden_states = all_hidden_states[0:-2]
-            for i in range(len(all_hidden_states)):
-                all_hidden_states[i] = torch.cat(all_hidden_states[i], 0)
+            # for i in range(len(all_hidden_states)):
+                # all_hidden_states[i] = torch.cat(all_hidden_states[i], 0)
 
         if not return_dict:
             return tuple(v for v in [logits,
